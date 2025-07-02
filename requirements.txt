@@ -1,0 +1,10 @@
+django
+django-cors-headers
+djangorestframework
+djangorestframework-simplejwt
+psycopg2-binary
+python-dotenv
+gunicorn
+langchain
+google-generativeai
+rank_bm25
