@@ -3,16 +3,15 @@ from pathlib import Path
 from dotenv import load_dotenv
 from datetime import timedelta
 
-
 # Load environment variables from .env file
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")  # fallback only for development
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["*"]  # adjust for production
+ALLOWED_HOSTS = ["*"]  # ✅ Allow any host (use caution in prod)
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -20,7 +19,7 @@ INSTALLED_APPS = [
     'core',
     'users',
     'tenaCare_agent',
-    'corsheaders',
+    'corsheaders',  # ✅ must come before CommonMiddleware in MIDDLEWARE
     'rest_framework',
     'rest_framework_simplejwt',
     'django.contrib.admin',
@@ -31,28 +30,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-}
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),  # token valid 1 day
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'AUTH_HEADER_TYPES': ('Bearer',),
-}
-
-AUTHENTICATION_BACKENDS = [
-    'users.auth_backend.EmailBackend',  # ✅ Correct class name
-    'django.contrib.auth.backends.ModelBackend',
-]
-
-
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # ✅ first!
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -79,7 +60,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'TenaCareAPI.wsgi.application'
 
-# Database (PostgreSQL from environment variables)
+# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -95,6 +76,29 @@ DATABASES = {
     }
 }
 
+# Django REST + JWT Config
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# Custom Email Auth Backend
+AUTHENTICATION_BACKENDS = [
+    'users.auth_backend.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# CORS CONFIG (✅ Open for all)
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True  # Optional for cookies/auth headers
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -107,5 +111,7 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
+
 STATIC_URL = 'static/'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
