@@ -6,6 +6,7 @@ from rest_framework.authtoken.models import Token
 from .serializers import UserSerializer
 from .models import User
 from rest_framework.permissions import AllowAny
+from rest_framework.generics import CreateAPIView
 
 # Create your views here.
 class RegisterView(CreateAPIView):
