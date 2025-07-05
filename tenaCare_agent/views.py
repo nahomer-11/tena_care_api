@@ -7,6 +7,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
+
+User = get_user_model()
+
 # Create your views here.
 class ChatSessionListView(ListAPIView):
     queryset = ChatSession.objects.all()
@@ -31,17 +34,15 @@ class SendMessageView(APIView):
         user = request.user
         content = request.data.get('content')
 
-        # Try to get the session, or create it if not found
-        session, created = ChatSession.objects.get_or_create(
-            id=session_id,
-            defaults={'user': user}
-        )
+        try:
+            session = ChatSession.objects.get(id=session_id)
+            if session.user != user:
+                return Response({"error": "You do not have access to this chat session."}, status=status.HTTP_403_FORBIDDEN)
+        except ChatSession.DoesNotExist:
+            # ✅ Create the session if it doesn't exist
+            session = ChatSession.objects.create(id=session_id, user=user)
 
-        # If it existed but belonged to another user, deny access
-        if not created and session.user != user:
-            return Response({"error": "You do not have access to this chat session."}, status=status.HTTP_403_FORBIDDEN)
-
-        # Create message
+        # Create the message
         message = Message.objects.create(
             session=session,
             sender='user',
