@@ -15,13 +15,16 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
         if not user:
             raise serializers.ValidationError('Invalid credentials')
 
+        # Use email as username for super call
         data = super().validate({'username': user.email, 'password': password})
+
         data['user'] = {
             'id': user.id,
             'email': user.email,
             'full_name': user.full_name,
         }
         return data
+
 
 
 class UserSerializer(serializers.ModelSerializer):
