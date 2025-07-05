@@ -28,31 +28,29 @@ class MessageListView(ListAPIView):
 
 class SendMessageView(APIView):
     def post(self, request, session_id):
+        user = request.user
         content = request.data.get('content')
-        
-        if not content:
-            return Response({"error": "Content is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            session = ChatSession.objects.get(id=session_id, user=request.user)
-        except ChatSession.DoesNotExist:
-            return Response({"error": "Chat session not found."}, status=status.HTTP_404_NOT_FOUND)
-        
-        user_message = Message.objects.create(
+        # Try to get the session, or create it if not found
+        session, created = ChatSession.objects.get_or_create(
+            id=session_id,
+            defaults={'user': user}
+        )
+
+        # If it existed but belonged to another user, deny access
+        if not created and session.user != user:
+            return Response({"error": "You do not have access to this chat session."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Create message
+        message = Message.objects.create(
             session=session,
             sender='user',
-            content = content
+            content=content
         )
-        
-        ai_reponse = f"Dummy AI response to: {content}" 
-        
-        ai_message = Message.objects.create(
-            session=session,
-            content=ai_reponse,
-            sender='ai'
-        )
-        
+
         return Response({
-            "user_message": MessageSerializer(user_message).data,
-            "ai_message": MessageSerializer(ai_message).data
+            'message': f'Message sent to session {session.id}',
+            'session_id': session.id,
+            'content': message.content,
+            'timestamp': message.time_stamp
         }, status=status.HTTP_201_CREATED)
