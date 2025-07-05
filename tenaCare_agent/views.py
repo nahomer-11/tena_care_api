@@ -21,13 +21,13 @@ class ChatSessionListView(ListAPIView):
         return ChatSession.objects.filter(user=self.request.user)
 
 class MessageListView(ListAPIView):
-    queryset = Message.objects.all()
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
         session_id = self.kwargs.get('session_id')
-        return Message.objects.filter(session__id=session_id)
+        return Message.objects.filter(session__id=session_id, session__user=self.request.user).order_by('time_stamp')
+
     
 
 class SendMessageView(APIView):
