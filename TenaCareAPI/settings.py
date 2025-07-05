@@ -36,9 +36,10 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = [
-    'users.auth_backend.EmailAuthBackend',
-    'django.contrib.auth.backends.ModelBackend',  # keep this so superuser login works
+    'users.auth_backend.EmailBackend',  # ✅ Correct class name
+    'django.contrib.auth.backends.ModelBackend',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
