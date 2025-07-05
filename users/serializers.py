@@ -1,11 +1,12 @@
 from .models import User
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True)
+
     class Meta:
         model = User
-        fields = ['id', 'email', 'full_name', 'phone_number', 'is_active', 'password', 'is_staff']
+        fields = ['id', 'email', 'full_name', 'phone_number', 'password', 'is_active', 'is_staff']
         read_only_fields = ['id', 'is_active', 'is_staff']
 
     def validate_email(self, value):
@@ -21,6 +22,6 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         password = validated_data.pop('password')
         user = User(**validated_data)
-        user.set_password(password)  # Password will be hashed
+        user.set_password(password)
         user.save()
         return user
