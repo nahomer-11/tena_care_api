@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from .serializers import UserSerializer
 from .models import User
+from rest_framework.permissions import AllowAny
 
 # Create your views here.
 class RegisterView(CreateAPIView):
@@ -12,6 +13,8 @@ class RegisterView(CreateAPIView):
     serializer_class = UserSerializer
 
 class LoginView(APIView):
+    permission_classes = [AllowAny]
+    
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
