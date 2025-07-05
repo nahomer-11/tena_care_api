@@ -1,13 +1,14 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import timedelta
 
-# Load environment variables from .env file
+# Load environment variables
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")  # fallback only for development
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")  # only for development
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = ["*"]  # adjust for production
@@ -18,9 +19,13 @@ INSTALLED_APPS = [
     'core',
     'users',
     'tenaCare_agent',
+
+    # 3rd-party
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
+
+    # Django default
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -29,14 +34,23 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+# ✅ JWT token config — 1-day access, 7-day refresh
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# ✅ Use JWT Authentication
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
 }
 
+# ✅ Email-based login backend (if you've implemented it)
 AUTHENTICATION_BACKENDS = [
-    'users.auth_backend.EmailBackend', 
+    'users.auth_backend.EmailBackend',  # your custom backend
 ]
 
 MIDDLEWARE = [
@@ -69,7 +83,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'TenaCareAPI.wsgi.application'
 
-# Database (PostgreSQL from environment variables)
+# ✅ PostgreSQL DB config
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -85,7 +99,7 @@ DATABASES = {
     }
 }
 
-# Password validation
+# ✅ Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -97,5 +111,6 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
+
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
