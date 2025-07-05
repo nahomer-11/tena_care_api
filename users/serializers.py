@@ -2,27 +2,31 @@ from .models import User
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import authenticate
-
+from django.utils.translation import gettext_lazy as _
 
 class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
-    username_field = 'email'
-
     def validate(self, attrs):
         email = attrs.get("email")
         password = attrs.get("password")
 
-        user = authenticate(self.context['request'], email=email, password=password)
-        if not user:
-            raise serializers.ValidationError('Invalid credentials')
+        if not email or not password:
+            raise serializers.ValidationError(_('Email and password are required.'))
 
-        # Use email as username for super call
-        data = super().validate({'username': user.email, 'password': password})
+        user = authenticate(request=self.context.get('request'), email=email, password=password)
+
+        if not user:
+            raise serializers.ValidationError(_('Invalid email or password.'))
+
+        # Use correct keys for parent class
+        attrs['username'] = email  # <- this line avoids KeyError internally
+        data = super().validate(attrs)
 
         data['user'] = {
             'id': user.id,
             'email': user.email,
             'full_name': user.full_name,
         }
+
         return data
 
 
