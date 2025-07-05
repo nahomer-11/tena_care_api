@@ -12,6 +12,7 @@ python3 -m pip install --upgrade pip
 pip3 install -r requirements.txt
 
 # Run database migrations (important step for Django setup)
+python3 manage.py makemigrations --no-input
 python3 manage.py migrate --no-input
 
 
