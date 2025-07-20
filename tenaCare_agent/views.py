@@ -48,13 +48,13 @@ class SendMessageView(APIView):
         if not content:
             return Response({"error": "Content is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # ✅ Check session ownership
+        # Check session ownership
         try:
             session = ChatSession.objects.get(id=session_id, user=user)
         except ChatSession.DoesNotExist:
             return Response({"error": "Chat session not found."}, status=status.HTTP_403_FORBIDDEN)
 
-        # ✅ Count messages sent by user today
+        # Count messages sent by user today
         today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
         today_messages = Message.objects.filter(
             session__user=user,
@@ -63,16 +63,15 @@ class SendMessageView(APIView):
         ).count()
 
         if today_messages >= 10:
+            # Don't save new message, don't call AI
             return Response({"error": "You have reached your daily limit of 10 messages."}, status=429)
 
-        # ✅ Save user message
+        # Save user message first
         user_message = Message.objects.create(session=session, sender='user', content=content)
 
-        # ✅ Generate AI response
-        # ✅ Generate AI response
+        # Try to generate AI response
         try:
             agent_result = agent.invoke({"input": content})
-            # If result is dict, extract output
             ai_response = (
                 agent_result.get("output")
                 if isinstance(agent_result, dict)
@@ -80,12 +79,18 @@ class SendMessageView(APIView):
             )
         except Exception as e:
             print(f"[TenaCare ERROR] AI agent failed: {str(e)}")
-            ai_response = "ይቅርታ፣ ጥያቄዎን ማስተናገድ አልቻልኩም። እባኮትን እንደገና ይሞክሩ።"
+            # Since AI response failed, delete the user message we just saved
+            user_message.delete()
+            return Response(
+                {"error": "Sorry, the AI failed to respond. Please try again later."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
 
-
+        # Save AI message only if AI response succeeded
         ai_message = Message.objects.create(session=session, sender='ai', content=ai_response)
 
         return Response({
             "user_message": MessageSerializer(user_message).data,
             "ai_message": MessageSerializer(ai_message).data
         }, status=status.HTTP_201_CREATED)
+
