@@ -16,11 +16,12 @@ llm =  ChatGoogleGenerativeAI(
     verbose=True,
 )
 
+
 agent = initialize_agent(
     tools=get_tools(),
     llm=llm,
     memory=memory,
-    agent=AgentType.CONVERSATIONAL_REACT_DESCRIPTION,
+    agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
     agent_kwargs={"system_message": general_prompt},
     verbose=True,
 )
