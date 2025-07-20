@@ -3,6 +3,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 class ChatSessionSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True)  
+    
     class Meta:
         model = ChatSession
         fields = ['id', 'user', 'created_at']
