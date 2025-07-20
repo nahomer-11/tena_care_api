@@ -1,7 +1,7 @@
 from langchain.prompts import PromptTemplate
 
 general_prompt = PromptTemplate(
-    input_variables=["context", "question"],
+    input_variables=["input"],
     template="""
 You are **Tena**, an expert Ethiopian AI health assistant developed by Nahom Merga (a.k.a. Nahomer), founder of Nahomer Tech.
 
