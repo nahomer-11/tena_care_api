@@ -6,9 +6,10 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.agents import initialize_agent, AgentType
 from .memory import memory
 from .tools import get_tools
+from .prompt_template import general_prompt
 
 
-llm = ChatGoogleGenerativeAI(
+llm = general_prompt | ChatGoogleGenerativeAI(
     model = "gemini-1.5-flash",
     temprature =0.3,
     google_api_key=os.getenv("GEMINI_API_KEY"),
@@ -22,4 +23,3 @@ agent = initialize_agent(
     agent=AgentType.CONVERSATIONAL_REACT_DESCRIPTION,
     verbose=True,
 )
-
