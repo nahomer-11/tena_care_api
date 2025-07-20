@@ -9,9 +9,9 @@ from .tools import get_tools
 from .prompt_template import general_prompt
 
 
-llm = general_prompt | ChatGoogleGenerativeAI(
+llm =  ChatGoogleGenerativeAI(
     model = "gemini-1.5-flash",
-    temprature =0.3,
+    temperature =0.3,
     google_api_key=os.getenv("GEMINI_API_KEY"),
     verbose=True,
 )
@@ -21,5 +21,6 @@ agent = initialize_agent(
     llm=llm,
     memory=memory,
     agent=AgentType.CONVERSATIONAL_REACT_DESCRIPTION,
+    agent_kwargs={"system_message": general_prompt},
     verbose=True,
 )
