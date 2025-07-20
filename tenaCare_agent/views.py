@@ -1,3 +1,5 @@
+# The above code defines views for creating chat sessions, listing sessions and messages, and sending
+# messages with limits in a Django REST framework API.
 # views.py
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, CreateAPIView
@@ -67,10 +69,19 @@ class SendMessageView(APIView):
         user_message = Message.objects.create(session=session, sender='user', content=content)
 
         # ✅ Generate AI response
+        # ✅ Generate AI response
         try:
-            ai_response = agent.run(content)
+            agent_result = agent.invoke({"input": content})
+            # If result is dict, extract output
+            ai_response = (
+                agent_result.get("output")
+                if isinstance(agent_result, dict)
+                else str(agent_result)
+            )
         except Exception as e:
-            ai_response = "Sorry, I couldn't process your request."
+            print(f"[TenaCare ERROR] AI agent failed: {str(e)}")
+            ai_response = "ይቅርታ፣ ጥያቄዎን ማስተናገድ አልቻልኩም። እባኮትን እንደገና ይሞክሩ።"
+
 
         ai_message = Message.objects.create(session=session, sender='ai', content=ai_response)
 
