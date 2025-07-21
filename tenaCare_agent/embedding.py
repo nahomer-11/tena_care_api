@@ -4,7 +4,7 @@ import os
 from huggingface_hub import InferenceClient
 
 HF_TOKEN = os.getenv("HF_API_TOKEN")
-MODEL = "thenlper/gte-large"
+MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 client = InferenceClient(
     model=MODEL,
