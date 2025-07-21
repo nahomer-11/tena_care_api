@@ -82,8 +82,8 @@ def rag_search(query: str) -> str:
     Returns:
         str: A string containing the RAG search results for the query.
     """
-    # Placeholder implementation
-    return rag_chain.run(query)
+    response = rag_chain.invoke(query)
+    return response["result"]
     
 
 
